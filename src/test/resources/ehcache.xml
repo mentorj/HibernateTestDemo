@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+    <cache
+            name="com.javaxpert.demos.entities.Product"
+            maxEntriesLocalHeap="10"
+            eternal="false"
+            timeToIdleSeconds="3"
+            timeToLiveSeconds="6"/>
+</ehcache>

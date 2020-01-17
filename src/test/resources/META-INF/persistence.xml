@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+    <persistence-unit name="Hello" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+        <properties>
+            <property name="javax.persistence.query.timeout" value="3000"/>
+            <property name="javax.persistence.lock.timeout" value="2000"/>
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:testdb" />
+            <property name="hibernate.archive.autodetection" value="class"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hbm2ddl.auto" value="create"/>
+            <property name="hibernate.cache.use__second__level__cache" value="true"/>
+            <property name="hibernate.cache.region.factory__class"
+                      value="org.hibernate.cache.ehcache.EhCacheRegionFactory"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>
