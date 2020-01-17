@@ -1,6 +1,7 @@
 package com.javaxpert.demos.jpa;
 
 import com.javaxpert.demos.entities.Product;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,12 +17,12 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 public class JPATest {
-    private static EntityManagerFactory emf;
-    private static EntityManager em;
+    private  EntityManagerFactory emf;
+    private  EntityManager em;
 
     private static Logger logger;
-    @BeforeClass
-    public static void setUpTest(){
+    @Before
+    public  void setUpTest(){
         logger = LoggerFactory.getLogger(JPATest.class);
 
         emf = Persistence.createEntityManagerFactory("Hello");
@@ -34,10 +35,17 @@ public class JPATest {
         em.getTransaction().begin();
         em.persist(p1);
         em.getTransaction().commit();
+        em.close();
+        logger.trace("setup finished after insert into db");
     }
     @Test
     public void testCachingWorks(){
-
-        assertEquals(null,null);
+        logger.trace("starting cache test case");
+        em=emf.createEntityManager();
+        Product p1 = em.find(Product.class,"001");
+        logger.debug("retrieved Product" + p1.getProductName());
+        Product p2= em.find(Product.class,"001");
+        logger.debug("retrieved Product" + p2.getProductName());
+        assertEquals(p1,p2);
     }
 }
