@@ -23,6 +23,7 @@
             <property name="hibernate.cache.use__second__level__cache" value="true"/>
             <property name="hibernate.cache.region.factory__class"
                       value="org.hibernate.cache.ehcache.EhCacheRegionFactory"/>
+            <property name="hibernate.generate_statistics" value="true"/>
         </properties>
 
     </persistence-unit>
