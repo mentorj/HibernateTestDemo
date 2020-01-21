@@ -1,5 +1,7 @@
 package com.javaxpert.demos.entities;
 
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -11,6 +13,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "product_tbl")
 @Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Product  implements Serializable {
     @Id
     private String productId;

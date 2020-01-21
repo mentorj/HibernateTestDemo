@@ -2,7 +2,6 @@
 <ehcache>
     <cache
             name="com.javaxpert.demos.entities.Product"
-            maxEntriesLocalHeap="10"
             eternal="false"
             timeToIdleSeconds="3"
             timeToLiveSeconds="6"/>

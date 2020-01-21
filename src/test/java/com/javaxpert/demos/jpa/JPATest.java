@@ -4,6 +4,7 @@ import com.javaxpert.demos.appenders.StaticAppender;
 import com.javaxpert.demos.entities.Product;
 import org.hibernate.Session;
 import org.hibernate.stat.SessionStatistics;
+import org.hibernate.stat.Statistics;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -27,34 +28,14 @@ public class JPATest {
 
     private static Logger logger;
 
-    // number of messages to be found if test is ok when grabbing the good pattern
-    // in the Hibernate L2 caching test
-    // @TODO FIXME please
-    private final static int OCCURENCES_MAX = 2;
-
-    // Pattern to be found in  the Hibernate caching test case
-    // @TODO FIXME PLEASE
-    private final static String PATTERN_SEARCHED_IN_LOGGER="";
-
     private final static int MAX_ENTITIES_IN_CONTAINERS=500000;
 
-    // @TODO FIXME PLEASE
-    private final static int CHECK_HIB_L2_MAX_OCCURENCES=1;
-
-    // @TODO FIXME PLEASE
-    private final static String CHECK_HIB_L2_PATTERN="nanoseconds spent performing 0 L2C hits";
 
 
-    @Before
-    // ensure to reset the custom appender before each test
-    public void resetLogger(){
-        StaticAppender.clearEvents();
-    }
 
     @Before
     public  void setUpTest(){
         logger = LoggerFactory.getLogger(JPATest.class);
-
         emf = Persistence.createEntityManagerFactory("Hello");
         em = emf.createEntityManager();
         logger.debug("test case setup is ok...");
@@ -65,8 +46,11 @@ public class JPATest {
         em.getTransaction().begin();
         em.persist(p1);
         em.getTransaction().commit();
-        em.close();
         logger.trace("setup finished after insert into db");
+        Session session = em.unwrap(Session.class);
+        // strange way to get access to the stats but it works
+        Statistics stats =session.getSessionFactory().getStatistics();
+        stats.clear();
     }
     @Test
     /**
@@ -83,9 +67,18 @@ public class JPATest {
         logger.debug("retrieved Product" + p2.getProductName());
         em.getTransaction().commit();
         assertEquals(p1,p2);
-        assertTrue(StaticAppender.getEvents().contains(PATTERN_SEARCHED_IN_LOGGER));
+        Session session = em.unwrap(Session.class);
+        // strange way to get access to the stats but it works
+        Statistics stats =session.getSessionFactory().getStatistics();
+        long num_connections = stats.getConnectCount();
+        logger.info("number of connections to db for this test is =" + num_connections);
+
+        assertEquals(num_connections,1);
+        // other way to check number of connections through the Appender searching for patterns
+        // using stats is more efficient and clean
+        //assertTrue(StaticAppender.getEvents().contains(PATTERN_SEARCHED_IN_LOGGER));
         // use the Appender to ensure that only one occurence for the message comes....
-        assertEquals(StaticAppender.getEvents().stream().filter(iLoggingEvent -> iLoggingEvent.getMessage().contains(PATTERN_SEARCHED_IN_LOGGER)).count(),OCCURENCES_MAX);
+        //assertEquals(StaticAppender.getEvents().stream().filter(iLoggingEvent -> iLoggingEvent.getMessage().contains(PATTERN_SEARCHED_IN_LOGGER)).count(),OCCURENCES_MAX);
     }
 
     /**
@@ -101,7 +94,6 @@ public class JPATest {
 
         // hack in JPA to get access to Hibernate specific Api
         Session session = em.unwrap(Session.class);
-        SessionStatistics stats = session.getStatistics();
         em.getTransaction().begin();
         Product p1= em.find(Product.class,"001");
         logger.trace("retrieved Product 001:"+ p1);
@@ -116,8 +108,12 @@ public class JPATest {
         // now check in the Hibernate statistics log if the object has been fetched from cache or not
         // 2 ways : from stats object or from logs through StaticAppender
         //assertTrue(StaticAppender.getEvents().stream().filter(evt -> evt.getMessage().contains(CHECK_HIB_L2_PATTERN)).count()==CHECK_HIB_L2_MAX_OCCURENCES);
-        //stats.
-        assertTrue(true);
+        // strange way to get access to the stats but it works
+        Statistics stats =session.getSessionFactory().getStatistics();
+        int num_hits = (int) stats.getSecondLevelCacheHitCount();
+        int missed = (int) stats.getSecondLevelCacheMissCount();
+        assertEquals(missed,0);
+        assertEquals(num_hits,1);
     }
 
 
